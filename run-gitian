@@ -83,7 +83,7 @@ if [ "$#" -lt 1 ]; then
     echo "-v\tverify" 1>&2
     echo "-O\tchoose target operating system linux or win, defaults to linux" 1>&2
     echo "\t(will build and sign with KEY_ID if neither option is present)" 1>&2
-    echo "VERSION\tis the BitShares release version to build" 1>&2
+    echo "VERSION\tis the Zcash release version to build" 1>&2
     echo "KEY_ID\tis the GPG key ID to use for signing" 1>&2
     echo "" 1>&2
     echo "builder-options:" 1>&2
@@ -97,8 +97,8 @@ fi
 VERSION="$1"
 shift
 
-[ -z "$BUILD" ]  || gbuild "../../descriptors/bitshares-core-$OS.yml" -c bitshares="$VERSION" "$@"
+[ -z "$BUILD" ]  || gbuild "../../descriptors/gitian-$OS.yml" -c zcash="$VERSION" "$@"
 [ -z "$SIGN" ]   || gsign --signer "$KEY_ID" --destination ../../signatures --release "$VERSION"-"$OS" \
-                          "../../descriptors/bitshares-core-$OS.yml"
+                          "../../descriptors/gitian-$OS.yml"
 [ -z "$VERIFY" ] || gverify --destination ../../signatures --release "$VERSION"-"$OS" \
-                            "../../descriptors/bitshares-core-$OS.yml"
+                            "../../descriptors/gitian-$OS.yml"

@@ -42,7 +42,7 @@ Your user must be able to run and access such virtualized environments. Dependin
 You must have GnuPG installed and on your path as `gpg`.
 
 Instructions on how to install required software on some OSes and prepare a gitian base environment can be found [here](https://github.com/devrandom/gitian-builder/blob/master/README.md).
-You should follow the described steps until you have completed the "Sanity-testing" section successfully. Be sure to use the "bionic" suite for your base image.
+You should follow the described steps until you have completed the "Sanity-testing" section successfully.
 
 If you want to build build executables for Mac you'll need to download MacOSX SDK 10.14.
 It is contained in the Xcode 10.3 distribution, which is available at https://developer.apple.com/xcode/resources/ under "Command Line Tools & Older Versions of Xcode". .
@@ -53,21 +53,18 @@ The resulting file `MacOSX10.14.sdk.tar.xz` must be put in the `vendor/gitian-bu
 
 `dockerd` must be running and the current user must have sufficient privileges to use it.
 
-#### Check out bitshares-gitian
+#### Check out zcashd-gitian
 
 ```
-git clone https://github.com/bitshares/bitshares-gitian.git
-cd bitshares-gitian
+git clone https://github.com/oxarbitrage/zcash-gitian
+cd zcash-gitian
 git submodule update --init --recursive
 ```
 
 #### Create base VMs
 
-Note: for better binary compatibility we build Linux binaries on Ubuntu Xenial (16.04), for Mac and Windows builds we use the newer Ubuntu Bionic (18.04).
-
 ```
-vendor/gitian-builder/bin/make-base-vm --docker --suite bionic
-vendor/gitian-builder/bin/make-base-vm --docker --suite xenial
+vendor/gitian-builder/bin/make-base-vm --docker --distro debian --suite jessie
 ```
 
 #### Sanity-testing
@@ -75,15 +72,15 @@ vendor/gitian-builder/bin/make-base-vm --docker --suite xenial
 ```
 export USE_DOCKER=1
 export PATH=$PATH:$(pwd)/vendor/gitian-builder/libexec
-make-clean-vm --suite bionic
-start-target 64 bionic-amd64
-on-target ls -la
-# total 12
-# drwxr-xr-x 2 ubuntu ubuntu   57 May 30 08:36 .
-# drwxr-xr-x 1 root   root     20 May 30 08:36 ..
-# -rw-r--r-- 1 ubuntu ubuntu  220 Apr  4  2018 .bash_logout
-# -rw-r--r-- 1 ubuntu ubuntu 3771 Apr  4  2018 .bashrc
-# -rw-r--r-- 1 ubuntu ubuntu  807 Apr  4  2018 .profile
+make-clean-vm --suite jessie
+start-target 64 jessie-amd64
+on-target --user debian ls -la
+#total 20
+#drwxr-xr-x 2 debian debian 4096 May  2 16:50 .
+#drwxr-xr-x 1 root   root   4096 May  2 16:50 ..
+#-rw-r--r-- 1 debian debian  220 Nov  5  2016 .bash_logout
+#-rw-r--r-- 1 debian debian 3515 Nov  5  2016 .bashrc
+#-rw-r--r-- 1 debian debian  675 Nov  5  2016 .profile
 stop-target
 ```
 
@@ -100,37 +97,43 @@ Enter `./run-gitian --help` to see the available options.
 **Note:** be sure to specify the underlying virtualization mechanism with gitian's environment variables, unless you use KVM!
 (`USE_DOCKER=1` for Docker, `USE_LXC=1` for LXC or `USE_VBOX=1` for VirtualBox.)
 
+Next examples are for linux and docker.
+
 ### Build and sign
 
-Example: build version 3.1.0 using 3 cores and 8 gigabytes of RAM, then sign with key ID 2d2746cc:
+Example: build version v2.1.2 using 3 cores and 8 gigabytes of RAM.
 
-`./run-gitian -b -s 2d2746cc 3.1.0 -m 8192 -j 3`
+ `USE_DOCKER=1 ./run-gitian -b v2.1.2 -m 8192 -j 3`
+
+ DBuild as above then sign with key ID 2d2746cc:
+
+`USE_DOCKER=1 ./run-gitian -b -s 2d2746cc v2.1.2 -m 8192 -j 3`
 
 This will create a subdirectory under `signatures`. If you want to contribute, please commit your signature and create a pull request. Make sure your public key is publicly available on GPG key servers.
 
 ### Verify
 
-Example: verify version 3.1.0:
+Example: verify version 2.1.2:
 
-`./run-gitian -v 3.1.0`
+`./run-gitian -v v2.1.2`
 
 ### Use binary
 
-A `bz2` file(`bitshares-3.1.0-linux-amd64-bin.tar.bz2`) will be generated at `bitshares-gitian/vendor/gitian-builder/build/out/`  after any `./run-gitan -b` is executed.
+A `tar.gz` file(`zcash-2.1.2-linux64.tar.gz`) will be generated at `zcash-gitian/vendor/gitian-builder/build/out/`  after any `./run-gitan -b` is executed.
 
-Example: use built witness_node binary: 
+Example: use built zcashd binary: 
 
 ```
 cd vendor/gitian-builder/build/out/
-tar xvfj bitshares-3.1.0-linux-amd64-bin.tar.bz2
-./bitshares-core-3.1.0-linux-amd64-bin/witness_node
+tar xvzf zcash-2.1.2-linux64.tar.gz
+./zcash-2.1.2/zcashd
 ```
 
 ## Repository branches
 
 From time to time it may become necessary to update the build descriptors, e. g. to update dependencies, or for other improvements.
 Such changes are likely to lead to different build results, which would invalidate existing signatures.
-Also, if a new version of bitshares-core makes such changes necessary, the change might break the build for older versions.
+Also, if a new version of zcash makes such changes necessary, the change might break the build for older versions.
 
 The plan for such breaking changes is:
 
@@ -140,7 +143,7 @@ The plan for such breaking changes is:
 
 ### Existing branches
 
-* [3.3.1](https://github.com/bitshares/bitshares-gitian/tree/3.3.1)
+* [2.1.2](https://github.com/oxarbitrage/zcash-gitian/tree/2.1.2)
 
 ## Further Reading
 
