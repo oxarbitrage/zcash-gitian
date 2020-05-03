@@ -105,7 +105,7 @@ Example: build version v2.1.2 using 3 cores and 8 gigabytes of RAM.
 
  `USE_DOCKER=1 ./run-gitian -b v2.1.2 -m 8192 -j 3`
 
- DBuild as above then sign with key ID 2d2746cc:
+ Build as above then sign with key ID 2d2746cc:
 
 `USE_DOCKER=1 ./run-gitian -b -s 2d2746cc v2.1.2 -m 8192 -j 3`
 
